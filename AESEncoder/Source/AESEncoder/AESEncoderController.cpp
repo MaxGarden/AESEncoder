@@ -31,7 +31,6 @@ bool CAESEncoderController::SetEncoder(const IEncoderSharedPtr& encoder)
     }
 
     const auto aesEncoder = std::dynamic_pointer_cast<IAESEncoder>(encoder);
-    EDITOR_ASSERT(aesEncoder);
     if (!aesEncoder)
         return false;
 

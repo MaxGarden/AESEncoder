@@ -55,7 +55,6 @@ bool CAESEncoderView::SetController(const IEncoderControllerSharedPtr& controlle
     }
 
     const auto aesEncoderController = std::dynamic_pointer_cast<IAESEncoderController>(controller);
-    EDITOR_ASSERT(aesEncoderController);
     if (!aesEncoderController)
         return false;
 
