@@ -3,6 +3,7 @@
 #include <memory>
 #include <assert.h>
 #include <vector>
+#include <map>
 
 using byte = unsigned char;
 

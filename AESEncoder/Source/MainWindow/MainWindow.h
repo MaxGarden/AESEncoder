@@ -5,13 +5,51 @@
 #include <QMainWindow>
 #include "ui_MainWindow.h"
 
-class MainWindow final : public QMainWindow, public Ui::MainWindow
+class CMainWindow final : public QMainWindow, public Ui::MainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow();
-    virtual ~MainWindow() override final = default;
+    CMainWindow();
+    virtual ~CMainWindow() override final = default;
+
+    bool RegisterEncoder(const QString& name, IEncoderUniquePtr&& encoder);
+    bool UnregisterEncoder(const QString& name);
+
+    bool RegisterEncoderController(IEncoderControllerUniquePtr&& controller);
+    bool RegisterEncoderView(IEncoderViewUniquePtr&& view);
+
+    bool Initialize();
+
+private:
+    bool SetupEncoderSelectCombobox();
+    void SelectEncoder(IEncoderSharedPtr encoder);
+
+    void ResetControllers();
+    void ResetViews();
+
+    IEncoderControllerSharedPtr FindMatchingController(const IEncoderSharedPtr& encoder) const noexcept;
+    IEncoderView* FindMatchingView(const IEncoderControllerSharedPtr& controller) const noexcept;
+
+    void SetEncoderViewWidget(QWidget* viewWidget);
+
+    void OnEncoderRegistered(const QString& name, IEncoder& encoder);
+    void OnEncoderUnregistered(const QString& name, IEncoder& encoder);
+
+
+private slots:
+    void OnEncoderChanged(const QString& name);
+
+private:
+    bool m_Initialized = false;
+
+    IEncoderSharedPtr m_CurrentEncoder;
+    QWidget* m_CurrentViewWidget = nullptr;
+
+    std::map<QString, IEncoderSharedPtr> m_Encoders;
+
+    std::vector<IEncoderControllerSharedPtr> m_ControllersPool;
+    std::vector<IEncoderViewUniquePtr> m_ViewsPool;
 };
 
 #endif //__MAIN_WINDOW_H__

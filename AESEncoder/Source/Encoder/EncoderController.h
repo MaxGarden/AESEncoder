@@ -2,8 +2,6 @@
 #define __ENCODER_CONTROLLER_H__
 #pragma once
 
-#include "EncoderContext.h"
-
 class IEncoderController
 {
 public:

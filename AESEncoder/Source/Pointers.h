@@ -1,5 +1,10 @@
-DECLARE_POINTERS(IEncoderContext)
 DECLARE_POINTERS(IEncoder)
 DECLARE_POINTERS(IEncoderController)
 DECLARE_POINTERS(IEncoderView)
-DECLARE_POINTERS(IEncoderSettings)
+
+namespace AES
+{
+    DECLARE_POINTERS(IAESEncoder);
+    DECLARE_POINTERS(IAESEncoderController);
+    DECLARE_POINTERS(IAESEncoderView);
+}
