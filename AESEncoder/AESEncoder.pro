@@ -18,6 +18,9 @@ SOURCES += \
     Source/AESEncoder/AESEncoder.cpp                                                \
     Source/AESEncoder/AESEncoderController.cpp                                      \
     Source/AESEncoder/AESEncoderView.cpp                                            \
+    Source/AESEncoder/Widgets/AESEncoderViewWidget.cpp                              \
+    Source/AESEncoder/BasicOperationsImplementation/AESCppBasicOperations.cpp       \
+    Source/AESEncoder/BasicOperationsImplementation/AESAsmBasicOperations.cpp       \
 
 HEADERS += \
     Source/Pointers.h                                                               \
@@ -26,8 +29,12 @@ HEADERS += \
     Source/Encoder/EncoderController.h                                              \
     Source/Encoder/EncoderView.h                                                    \
     Source/AESEncoder/AESEncoder.h                                                  \
+    Source/AESEncoder/AESBasicOperations.h                                          \
     Source/AESEncoder/AESEncoderController.h                                        \
     Source/AESEncoder/AESEncoderView.h                                              \
+    Source/AESEncoder/Widgets/AESEncoderViewWidget.h                                \
+    Source/AESEncoder/BasicOperationsImplementation/AESCppBasicOperations.h         \
+    Source/AESEncoder/BasicOperationsImplementation/AESAsmBasicOperations.h         \
     
 
 FORMS += \

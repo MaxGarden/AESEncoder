@@ -3,13 +3,14 @@
 #pragma once
 
 #include "Encoder/Encoder.h"
+#include "AESBasicOperations.h"
 
 namespace AES
 {
     enum class EKeyType
     {
         Bits128,
-        Bits196,
+        Bits192,
         Bits256,
 
         __Count
@@ -28,7 +29,7 @@ namespace AES
         virtual bool SetKey(const Key& key) noexcept = 0;
         virtual const Key& GetKey() const noexcept = 0;
 
-        static IAESEncoderUniquePtr Create();
+        static IAESEncoderUniquePtr Create(IAESBasicOperationsUniquePtr&& basicOperations);
     };
 }
 

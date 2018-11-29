@@ -2,30 +2,9 @@
 #include "AESEncoderView.h"
 #include "AESEncoderController.h"
 #include "ui_AESEncoderView.h"
+#include "Widgets/AESEncoderViewWidget.h"
 
 using namespace AES;
-
-class CAESEncoderViewWidget final : public QWidget, public Ui::AESEncoderView
-{
-public:
-    CAESEncoderViewWidget(QWidget* parent);
-    virtual ~CAESEncoderViewWidget() override final = default;
-
-    void SetController(IAESEncoderController* controller);
-
-private:
-    IAESEncoderController* m_Controller = nullptr;
-};
-
-void CAESEncoderViewWidget::SetController(IAESEncoderController* controller)
-{
-    m_Controller = controller;
-}
-
-CAESEncoderViewWidget::CAESEncoderViewWidget(QWidget* parent) : QWidget(parent)
-{
-    setupUi(this);
-}
 
 class CAESEncoderView final : public IAESEncoderView
 {

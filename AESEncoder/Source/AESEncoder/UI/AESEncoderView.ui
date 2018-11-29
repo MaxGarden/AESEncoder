@@ -31,15 +31,60 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QComboBox" name="comboBox"/>
+      <widget class="QComboBox" name="m_KeyTypeComboBox">
+       <property name="editable">
+        <bool>false</bool>
+       </property>
+      </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QLineEdit" name="lineEdit"/>
+      <widget class="QLineEdit" name="m_KeyLineEdit">
+       <property name="echoMode">
+        <enum>QLineEdit::PasswordEchoOnEdit</enum>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>m_KeyTypeComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>AESEncoderView</receiver>
+   <slot>OnKeyTypeChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>226</x>
+     <y>19</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_KeyLineEdit</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>AESEncoderView</receiver>
+   <slot>OnKeyChanged(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>226</x>
+     <y>45</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>OnKeyTypeChanged(int)</slot>
+  <slot>OnKeyChanged(QString)</slot>
+ </slots>
 </ui>

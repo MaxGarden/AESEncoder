@@ -3,6 +3,11 @@
 #include "Encoder/Encoder.h"
 #include "Encoder/EncoderController.h"
 #include "Encoder/EncoderView.h"
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QElapsedTimer>
+#include <QDateTime>
+#include <fstream>
 
 CMainWindow::CMainWindow() : QMainWindow(nullptr)
 {
@@ -71,25 +76,11 @@ bool CMainWindow::Initialize()
 
     m_Initialized = true;
 
-    m_Initialized &= SetupEncoderSelectCombobox();
-
     if (!m_Encoders.empty())
         SelectEncoder(m_Encoders.cbegin()->second);
 
     EDITOR_ASSERT(m_Initialized);
     return m_Initialized;
-}
-
-bool CMainWindow::SetupEncoderSelectCombobox()
-{
-    EDITOR_ASSERT(m_EncoderSelectComboBox);
-    if (!m_EncoderSelectComboBox)
-        return false;
-
-    const auto result = connect(m_EncoderSelectComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(OnEncoderChanged(const QString&)));
-    EDITOR_ASSERT(result);
-
-    return result;
 }
 
 void CMainWindow::OnEncoderChanged(const QString& name)
@@ -99,6 +90,32 @@ void CMainWindow::OnEncoderChanged(const QString& name)
 
     EDITOR_ASSERT(isIteratorValid);
     SelectEncoder(isIteratorValid ? iterator->second : nullptr);
+}
+
+void CMainWindow::OnEncodeButtonClicked()
+{
+    EncodeFile(QString::null);
+}
+
+void CMainWindow::OnEncodeAsButtonClicked()
+{
+    const auto saveFileName = QFileDialog::getSaveFileName(this, tr("Save file"));
+
+    if (saveFileName.isNull() || saveFileName.isEmpty())
+        return;
+
+    EncodeFile(saveFileName);
+}
+
+void CMainWindow::OnBrowseFileToEncodeButtonClicked()
+{
+    const auto fileToEncodeName = QFileDialog::getOpenFileName(this, tr("File to encode"));
+
+    if (fileToEncodeName.isNull() || fileToEncodeName.isEmpty())
+        return;
+
+    if (m_FileToEncodeLineEdit)
+        m_FileToEncodeLineEdit->setText(fileToEncodeName);
 }
 
 void CMainWindow::SelectEncoder(IEncoderSharedPtr encoder)
@@ -124,6 +141,7 @@ void CMainWindow::SelectEncoder(IEncoderSharedPtr encoder)
         return SelectEncoder(nullptr);
 
     SetEncoderViewWidget(encoderView->GetViewWidget());
+    m_CurrentEncoder = std::move(encoder);
 }
 
 template<typename ContainerType, typename FunctionType>
@@ -234,4 +252,91 @@ void CMainWindow::OnEncoderUnregistered(const QString& name, IEncoder& encoder)
 
     if (m_CurrentEncoder.get() == &encoder)
         SelectEncoder(nullptr);
+}
+
+void CMainWindow::EncodeFile(const QString& savePath) const
+{
+    const auto fileToEncodeName = m_FileToEncodeLineEdit ? m_FileToEncodeLineEdit->text() : QString{};
+
+    EncoderData dataToEncode;
+    if (!OpenFileToEncode(fileToEncodeName, dataToEncode))
+        return;
+
+    QElapsedTimer timer;
+    timer.start();
+
+    const auto encodedData = m_CurrentEncoder->Encode(dataToEncode);
+
+    const auto encodingTimeInMiliSec = timer.nsecsElapsed() / 1000000;
+
+    if (encodedData.size() < dataToEncode.size())
+    {
+        QMessageBox::critical(nullptr, tr("Error"), tr("Encoding failed!"));
+        return;
+    }
+
+    const auto fileToSaveName = savePath.isNull() ? fileToEncodeName : savePath;
+    if (!SaveEncodedDataToFile(fileToSaveName, encodedData))
+        return;
+
+    QMessageBox::information(nullptr, tr("Success"), tr("Done, see logs for details."));
+
+    if (m_LogTextEdit)
+    {
+        const auto currentTime = QDateTime::currentDateTime().time().toString();
+        m_LogTextEdit->append(QString{ "%1: Encoding file %2 to file %3 by using encoder %4 took %5 ms." }
+            .arg(currentTime)
+            .arg(fileToEncodeName, fileToSaveName)
+            .arg(m_EncoderSelectComboBox ? m_EncoderSelectComboBox->currentText() : tr("UNKNOWN"))
+            .arg(encodingTimeInMiliSec));
+    }
+}
+
+bool CMainWindow::OpenFileToEncode(const QString& filename, EncoderData& dataToEncode) const
+{
+    static const auto maxEncodeFileSize = 1024 * 1024 * 1024; //1GiB
+
+    if (!m_CurrentEncoder)
+    {
+        QMessageBox::critical(nullptr, tr("Error"), tr("Internal error: current encoder is null!"));
+        return false;
+    }
+
+    std::ifstream fileToEncode{ filename.toStdString(), std::ios::binary | std::ios::ate };
+    if (!fileToEncode.good())
+    {
+        QMessageBox::critical(nullptr, tr("Error"), QString{ "Cannot open file \"%1\" to read!" }.arg(filename));
+        return false;
+    }
+
+    const auto fileToEncodeSize = fileToEncode.tellg();
+    if (fileToEncodeSize > maxEncodeFileSize)
+    {
+        QMessageBox::critical(nullptr, tr("Error"), QString{ "File size %1 is greater than maximum size %2!" }.arg(fileToEncodeSize, maxEncodeFileSize));
+        return false;
+    }
+
+    fileToEncode.seekg(0, std::ios::beg);;
+
+    dataToEncode.resize(fileToEncodeSize);
+    fileToEncode.read(reinterpret_cast<char*>(dataToEncode.data()), dataToEncode.size());
+
+    fileToEncode.close();
+
+    return true;
+}
+
+bool CMainWindow::SaveEncodedDataToFile(const QString& filename, const EncoderData& encodedData) const
+{
+    std::ofstream fileToSave{ filename.toStdString(), std::ios::binary };
+    if (!fileToSave.good())
+    {
+        QMessageBox::critical(nullptr, tr("Error"), QString{ "Cannot open file \"%1\" to write!" }.arg(filename));
+        return false;
+    }
+
+    fileToSave.write(reinterpret_cast<const char*>(encodedData.data()), encodedData.size());
+    fileToSave.close();
+
+    return true;
 }

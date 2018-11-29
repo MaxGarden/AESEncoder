@@ -6,16 +6,22 @@
 #include "AESEncoder/AESEncoderController.h"
 #include "AESEncoder/AESEncoderView.h"
 
+#include "AESEncoder/BasicOperationsImplementation/AESCppBasicOperations.h"
+#include "AESEncoder/BasicOperationsImplementation/AESAsmBasicOperations.h"
+
+#include <fstream>
+
 int main(int argc, char** argv)
 {
     QApplication app(argc, argv);
     CMainWindow mainWindow;
 
     auto registrationResult = true;
-
-    registrationResult &= mainWindow.RegisterEncoder("AES", AES::IAESEncoder::Create());
     registrationResult &= mainWindow.RegisterEncoderController(AES::IAESEncoderController::Create());
     registrationResult &= mainWindow.RegisterEncoderView(AES::IAESEncoderView::Create());
+
+    registrationResult &= mainWindow.RegisterEncoder("AES-cpp", AES::IAESEncoder::Create(std::make_unique<AES::CAESCppBasicOperations>()));
+    registrationResult &= mainWindow.RegisterEncoder("AES-asm", AES::IAESEncoder::Create(std::make_unique<AES::CAESAsmBasicOperations>()));
 
     EDITOR_ASSERT(registrationResult);
     if (!registrationResult)
@@ -27,6 +33,5 @@ int main(int argc, char** argv)
         return -2;
 
     mainWindow.show();
-
     return app.exec();
 }

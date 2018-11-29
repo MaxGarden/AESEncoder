@@ -3,6 +3,7 @@
 #pragma once
 
 #include <QMainWindow>
+#include "Encoder/Encoder.h"
 #include "ui_MainWindow.h"
 
 class CMainWindow final : public QMainWindow, public Ui::MainWindow
@@ -22,7 +23,6 @@ public:
     bool Initialize();
 
 private:
-    bool SetupEncoderSelectCombobox();
     void SelectEncoder(IEncoderSharedPtr encoder);
 
     void ResetControllers();
@@ -36,9 +36,15 @@ private:
     void OnEncoderRegistered(const QString& name, IEncoder& encoder);
     void OnEncoderUnregistered(const QString& name, IEncoder& encoder);
 
+    void EncodeFile(const QString& savePath) const;
+    bool OpenFileToEncode(const QString& filename, EncoderData& dataToEncode) const;
+    bool SaveEncodedDataToFile(const QString& filename, const EncoderData& encodedData) const;
 
 private slots:
     void OnEncoderChanged(const QString& name);
+    void OnEncodeButtonClicked();
+    void OnEncodeAsButtonClicked();
+    void OnBrowseFileToEncodeButtonClicked();
 
 private:
     bool m_Initialized = false;
