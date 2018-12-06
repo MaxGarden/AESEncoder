@@ -18,12 +18,12 @@ namespace AES
         void SetController(IAESEncoderController* controller);
 
     private:
-        void Setup();
+        void ResetView();
+        bool TryApplySettingsToController();
 
-        private slots:
+    private slots:
         void OnKeyTypeChanged(int index);
         void OnKeyChanged(const QString& key);
-
 
     private:
         IAESEncoderController * m_Controller = nullptr;

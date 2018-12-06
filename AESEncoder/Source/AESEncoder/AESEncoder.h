@@ -28,8 +28,6 @@ namespace AES
 
         virtual bool SetKey(const Key& key) noexcept = 0;
         virtual const Key& GetKey() const noexcept = 0;
-
-        static IAESEncoderUniquePtr Create(IAESBasicOperationsUniquePtr&& basicOperations);
     };
 }
 
