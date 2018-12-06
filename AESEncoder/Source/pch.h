@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <array>
+#include <functional>
 
 using byte = unsigned char;
 

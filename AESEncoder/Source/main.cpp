@@ -19,8 +19,8 @@ int main(int argc, char** argv)
     registrationResult &= mainWindow.RegisterEncoderController(AES::IAESEncoderController::Create());
     registrationResult &= mainWindow.RegisterEncoderView(AES::IAESEncoderView::Create());
 
-    registrationResult &= mainWindow.RegisterEncoder("AES(asm)", std::make_unique<AES::CAESAsmEncoder>());
     registrationResult &= mainWindow.RegisterEncoder("AES(cpp)", std::make_unique<AES::CAESCppEncoder>());
+    registrationResult &= mainWindow.RegisterEncoder("AES(asm)", std::make_unique<AES::CAESAsmEncoder>());
 
     EDITOR_ASSERT(registrationResult);
     if (!registrationResult)

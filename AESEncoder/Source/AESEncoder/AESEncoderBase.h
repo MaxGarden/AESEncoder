@@ -12,6 +12,8 @@ namespace AES
         CAESEncoderBase() = default;
         virtual ~CAESEncoderBase() override = default;
 
+        virtual EncoderData Encode(const EncoderData& data) override final;
+
         virtual bool SetKeyType(EKeyType keyType) noexcept override final;
         virtual EKeyType GetKeyType() const noexcept override final;
 
@@ -20,17 +22,20 @@ namespace AES
 
     protected:
         using ExpandedKey = std::vector<uint8_t>;
-
-        bool Setup() noexcept;
-        ExpandedKey ExpandKey() const noexcept;
         uint8_t GMultiplication(uint8_t first, uint8_t second) const noexcept;
 
         unsigned int GetRoundsNumber() const noexcept;
+
+        virtual bool EncodeDataChunk(uint8_t* dataChunk, size_t dataChunkSize, const ExpandedKey& expandedKey) const noexcept = 0;
 
     protected:
         static const std::array<uint8_t, 256> s_Sbox;
         static const auto s_StateDimension = 4u;
         static const auto s_StateSize = s_StateDimension * s_StateDimension;
+
+    private:
+        bool Setup() noexcept;
+        ExpandedKey ExpandKey() const noexcept;
 
     private:
         EKeyType m_KeyType = EKeyType::Bits128;

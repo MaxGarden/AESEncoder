@@ -4,19 +4,8 @@
 
 using namespace AES;
 
-EncoderData CAESAsmEncoder::Encode(const EncoderData& data)
+bool AES::CAESAsmEncoder::EncodeDataChunk(uint8_t* dataChunk, size_t dataChunkSize, const ExpandedKey& expandedKey) const noexcept
 {
-    EncoderData result;
-
-    if (!Setup())
-        return result;
-
-    const auto paddingSize = s_StateSize - (data.size() % s_StateSize);
-    result = data;
-    result.resize(result.size() + paddingSize, 0);
-
-    const auto expandedKey = ExpandKey();
-
     const auto encodeFunction = [keyType = GetKeyType()]()
     {
         switch (keyType)
@@ -31,10 +20,9 @@ EncoderData CAESAsmEncoder::Encode(const EncoderData& data)
         }
     }();
 
+    const auto expandedKeyData = expandedKey.data();
+    for (auto offset = 0u; offset < dataChunkSize; offset += s_StateSize)
+        (*encodeFunction)(&dataChunk[offset], expandedKeyData);
 
-    const auto size = result.size();
-    for (auto offset = 0u; offset < size; offset += s_StateSize)
-        (*encodeFunction)(&result[offset], &result[offset], expandedKey.data());
-
-    return result;
+    return true;
 }

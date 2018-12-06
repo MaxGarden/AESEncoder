@@ -12,11 +12,11 @@ namespace AES
         CAESCppEncoder() = default;
         virtual ~CAESCppEncoder() override final = default;
 
-        virtual EncoderData Encode(const EncoderData& data) override final;
+    protected:
+        virtual bool EncodeDataChunk(uint8_t* dataChunk, size_t dataChunkSize, const ExpandedKey& expandedKey) const noexcept override final;
 
     private:
-        using State = std::array<uint8_t, s_StateSize>;
-        void EncodeState(State& state, const ExpandedKey& expandedKey, unsigned int roundNumber) const noexcept;
+        void EncodeState(uint8_t* state, const uint8_t* expandedKey, unsigned int roundNumber) const noexcept;
 
         void AddRoundKey(uint8_t* state, const uint8_t* expandedKey) const noexcept;
         void SubBytes(uint8_t* state) const noexcept;

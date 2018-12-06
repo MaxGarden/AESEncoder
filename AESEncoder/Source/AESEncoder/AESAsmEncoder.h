@@ -12,7 +12,8 @@ namespace AES
         CAESAsmEncoder() = default;
         virtual ~CAESAsmEncoder() override final = default;
 
-        virtual EncoderData Encode(const EncoderData& data) override final;
+    protected:
+        virtual bool EncodeDataChunk(uint8_t* dataChunk, size_t dataChunkSize, const ExpandedKey& expandedKey) const noexcept override final;
     };
 }
 

@@ -76,8 +76,7 @@ bool CMainWindow::Initialize()
 
     m_Initialized = true;
 
-    if (!m_Encoders.empty())
-        SelectEncoder(m_Encoders.cbegin()->second);
+    EDITOR_ASSERT(m_CurrentEncoder);
 
     EDITOR_ASSERT(m_Initialized);
     return m_Initialized;
@@ -254,7 +253,7 @@ void CMainWindow::OnEncoderUnregistered(const QString& name, IEncoder& encoder)
         SelectEncoder(nullptr);
 }
 
-void CMainWindow::EncodeFile(const QString& savePath) const
+void CMainWindow::EncodeFile(const QString& savePath)
 {
     const auto fileToEncodeName = m_FileToEncodeLineEdit ? m_FileToEncodeLineEdit->text() : QString{};
 
@@ -267,7 +266,7 @@ void CMainWindow::EncodeFile(const QString& savePath) const
 
     const auto encodedData = m_CurrentEncoder->Encode(dataToEncode);
 
-    const auto encodingTimeInMiliSec = timer.nsecsElapsed() / 1000000;
+    const auto encodingTimeInNanoSeconds = timer.nsecsElapsed();
 
     if (encodedData.size() < dataToEncode.size())
     {
@@ -284,11 +283,11 @@ void CMainWindow::EncodeFile(const QString& savePath) const
     if (m_LogTextEdit)
     {
         const auto currentTime = QDateTime::currentDateTime().time().toString();
-        m_LogTextEdit->append(QString{ "%1: Encoding file %2 to file %3 by using encoder %4 took %5 ms." }
+        m_LogTextEdit->append(QString{ "%1: Encoding file %2 to file %3 by using encoder %4 took %5 ns." }
             .arg(currentTime)
             .arg(fileToEncodeName, fileToSaveName)
             .arg(m_EncoderSelectComboBox ? m_EncoderSelectComboBox->currentText() : tr("UNKNOWN"))
-            .arg(encodingTimeInMiliSec));
+            .arg(encodingTimeInNanoSeconds));
     }
 }
 

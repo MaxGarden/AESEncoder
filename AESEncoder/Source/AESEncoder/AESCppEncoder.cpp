@@ -3,82 +3,47 @@
 
 using namespace AES;
 
-EncoderData CAESCppEncoder::Encode(const EncoderData& data)
+bool CAESCppEncoder::EncodeDataChunk(uint8_t* dataChunk, size_t dataChunkSize, const ExpandedKey& expandedKey) const noexcept
 {
-    EncoderData result;
-
-    if (!Setup())
-        return result;
-
-    const auto paddingSize = s_StateSize - (data.size() % s_StateSize);
-    result.resize(data.size() + paddingSize);
-
-    const auto expandedKey = ExpandKey();
-
+    const auto expandedKeyData = expandedKey.data();
     const auto roundsNumber = GetRoundsNumber();
 
-    const auto dataSize = data.size();
-    for (auto offset = 0u; offset < dataSize; offset += s_StateSize)
-    {
-        State state;
+    for (auto offset = 0u; offset < dataChunkSize; offset += s_StateSize)
+        EncodeState(&dataChunk[offset], expandedKeyData, roundsNumber);
 
-        for (auto i = 0u; i < s_StateDimension; ++i)
-        {
-            for (auto j = 0u; j < s_StateDimension; ++j)
-            {
-                const auto dataIndex = offset + i + s_StateDimension * j;
-                state[s_StateDimension * i + j] = dataIndex < data.size() ? data[dataIndex] : 0;
-            }
-        }
-
-        EncodeState(state, expandedKey, roundsNumber);
-
-        for (auto i = 0u; i < s_StateDimension; ++i)
-        {
-            for (auto j = 0u; j < s_StateDimension; ++j)
-                result[offset + i + s_StateDimension * j] = state[s_StateDimension * i + j];
-        }
-    }
-
-    return result;
+    return true;
 }
 
-void CAESCppEncoder::EncodeState(State& state, const ExpandedKey& expandedKey, unsigned int roundsNumber) const noexcept
+void CAESCppEncoder::EncodeState(uint8_t* state, const uint8_t* expandedKey, unsigned int roundsNumber) const noexcept
 {
-    AddRoundKey(state.data(), expandedKey.data());
+    AddRoundKey(state, expandedKey);
 
     for (auto i = 1u; i < roundsNumber; ++i)
     {
-        SubBytes(state.data());
-        ShiftRows(state.data());
-        MixColumns(state.data());
-        AddRoundKey(state.data(), expandedKey.data() + s_StateSize * i);
+        SubBytes(state);
+        ShiftRows(state);
+        MixColumns(state);
+        AddRoundKey(state, expandedKey + s_StateSize * i);
     }
 
-    SubBytes(state.data());
-    ShiftRows(state.data());
-    AddRoundKey(state.data(), expandedKey.data() + s_StateSize * roundsNumber);
+    SubBytes(state);
+    ShiftRows(state);
+    AddRoundKey(state, expandedKey + s_StateSize * roundsNumber);
 }
 
 void CAESCppEncoder::AddRoundKey(uint8_t* state, const uint8_t* expandedKey) const noexcept
 {
-    for (auto i = 0u; i < s_StateDimension; ++i)
-    {
-        for (auto x = 0u; x < s_StateDimension; ++x)
-            state[s_StateDimension * x + i] = state[s_StateDimension * x + i] ^ expandedKey[s_StateDimension * i + x];
-    }
+    for (auto i = 0u; i < s_StateSize; ++i)
+        state[i] ^= expandedKey[i];
 }
 
 void CAESCppEncoder::SubBytes(uint8_t* state) const noexcept
 {
-    for (auto i = 0u; i < s_StateDimension; ++i)
+    for (auto i = 0u; i < s_StateSize; ++i)
     {
-        for (auto j = 0u; j < s_StateDimension; ++j)
-        {
-            const auto row = (state[s_StateDimension*i + j] & 0xf0) >> 4;
-            const auto column = state[s_StateDimension*i + j] & 0x0f;
-            state[s_StateDimension*i + j] = s_Sbox[16 * row + column];
-        }
+        const auto row = (state[i] & 0xf0) >> 4;
+        const auto column = state[i] & 0x0f;
+        state[i] = s_Sbox[16 * row + column];
     }
 }
 
@@ -88,12 +53,12 @@ void CAESCppEncoder::ShiftRows(uint8_t* state) const noexcept
     {
         for (auto s = 0u; s < i; ++s)
         {
-            const auto buffer = state[s_StateDimension * i + 0];
+            const auto buffer = state[i];
 
             for (auto k = 1u; k < s_StateDimension; ++k)
-                state[s_StateDimension * i + k - 1] = state[s_StateDimension * i + k];
+                state[i + (k - 1) * s_StateDimension] = state[i + k * s_StateDimension];
 
-            state[s_StateDimension * i + s_StateDimension - 1] = buffer;
+            state[i + (s_StateDimension - 1) * s_StateDimension] = buffer;
         }
     }
 }
@@ -110,17 +75,18 @@ void CAESCppEncoder::MixColumns(uint8_t* state) const noexcept
 
     static_assert(s_StateDimension == 4, "Mixing columns of matrix that dimension is other than 4 is not supported.");
 
-    std::array<uint8_t, 4> a{ 0x02, 0x01, 0x01, 0x03 };
-    uint8_t col[s_StateDimension], res[s_StateDimension];
+    static const std::array<uint8_t, 4> magicArray{ 0x02, 0x01, 0x01, 0x03 };
+    static uint8_t column[s_StateDimension];
+    static uint8_t result[s_StateDimension];
 
     for (auto j = 0u; j < s_StateDimension; ++j)
     {
-        for (auto i = 0u; i < s_StateDimension; ++i)
-            col[i] = state[s_StateDimension*i + j];
+        for (auto i = 0; i < s_StateDimension; ++i)
+            column[i] = state[s_StateDimension * j + i];
 
-        xorMultiplication(res, a, col);
+        xorMultiplication(result, magicArray, column);
 
         for (auto i = 0u; i < s_StateDimension; ++i)
-            state[s_StateDimension*i + j] = res[i];
+            state[s_StateDimension * j + i] = result[i];
     }
 }

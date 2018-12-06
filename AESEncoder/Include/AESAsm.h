@@ -12,9 +12,9 @@ namespace AESAsm
 {
     using byte = unsigned char;
 
-    void DLLFUNCTION Aes128bEncryption(byte* destination, const byte* state, const byte* expandedKey);
-    void DLLFUNCTION Aes192bEncryption(byte* destination, const byte* state, const byte* expandedKey);
-    void DLLFUNCTION Aes256bEncryption(byte* destination, const byte* state, const byte* expandedKey);
+    void DLLFUNCTION Aes128bEncryption(byte* state, const byte* expandedKey);
+    void DLLFUNCTION Aes192bEncryption(byte* state, const byte* expandedKey);
+    void DLLFUNCTION Aes256bEncryption(byte* state, const byte* expandedKey);
 }
 
 #endif //__AES_ASM_H__

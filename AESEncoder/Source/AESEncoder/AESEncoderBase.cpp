@@ -21,6 +21,27 @@ const std::array<uint8_t, 256> CAESEncoderBase::s_Sbox = {
     0xe1, 0xf8, 0x98, 0x11, 0x69, 0xd9, 0x8e, 0x94, 0x9b, 0x1e, 0x87, 0xe9, 0xce, 0x55, 0x28, 0xdf,
     0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16 };
 
+EncoderData CAESEncoderBase::Encode(const EncoderData& data)
+{
+    EncoderData result;
+
+    if (!Setup())
+        return result;
+
+    const auto paddingSize = s_StateSize - (data.size() % s_StateSize);
+    result = data;
+    result.resize(result.size() + paddingSize, 0);
+
+    const auto expandedKey = ExpandKey();
+
+    const auto encodeResult = EncodeDataChunk(result.data(), result.size(), expandedKey);
+    EDITOR_ASSERT(encodeResult);
+
+    if (!encodeResult)
+        result.clear();
+
+    return result;
+}
 
 bool CAESEncoderBase::SetKeyType(EKeyType keyType) noexcept
 {
@@ -133,7 +154,7 @@ CAESEncoderBase::ExpandedKey CAESEncoderBase::ExpandKey() const noexcept
         for (auto x = 0u; x < buffer.size(); ++x)
             buffer[x] = result[4 * (i - 1) + x];
 
-        if (i%m_ExpandKeyRoundsNumber == 0) {
+        if (i % m_ExpandKeyRoundsNumber == 0) {
 
             rotateWord(buffer);
             subWord(buffer);
