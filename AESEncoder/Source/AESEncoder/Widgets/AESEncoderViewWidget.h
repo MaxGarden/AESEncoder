@@ -24,6 +24,7 @@ namespace AES
     private slots:
         void OnKeyTypeChanged(int index);
         void OnKeyChanged(const QString& key);
+        void OnMaxThreadsNumberChanged(const QString& number);
 
     private:
         IAESEncoderController * m_Controller = nullptr;

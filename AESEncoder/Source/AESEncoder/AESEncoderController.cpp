@@ -18,6 +18,9 @@ public:
     virtual bool SetKey(const Key& key) noexcept override final;
     virtual const Key& GetKey() const noexcept override final;
 
+    virtual bool SetMaximumThreadsWorkers(size_t threadsNumber) noexcept override final;
+    virtual size_t GetMaximumThreadsWorkers() const noexcept override final;
+
 private:
     IAESEncoderSharedPtr m_Encoder;
 };
@@ -44,7 +47,8 @@ bool CAESEncoderController::SetKeyType(EKeyType keyType) noexcept
     if (!m_Encoder)
         return false;
 
-    return m_Encoder->SetKeyType(keyType);
+    m_Encoder->SetKeyType(keyType);
+    return true;
 }
 
 EKeyType CAESEncoderController::GetKeyType() const noexcept
@@ -59,7 +63,8 @@ bool CAESEncoderController::SetKey(const Key& key) noexcept
     if (!m_Encoder)
         return false;
 
-    return m_Encoder->SetKey(key);
+    m_Encoder->SetKey(key);
+    return true;
 }
 
 const Key& CAESEncoderController::GetKey() const noexcept
@@ -68,6 +73,21 @@ const Key& CAESEncoderController::GetKey() const noexcept
 
     EDITOR_ASSERT(m_Encoder);
     return m_Encoder ? m_Encoder->GetKey() : emptyKey;
+}
+
+bool CAESEncoderController::SetMaximumThreadsWorkers(size_t threadsNumber) noexcept
+{
+    EDITOR_ASSERT(m_Encoder);
+    if (!m_Encoder)
+        return false;
+
+    return m_Encoder->SetMaximumThreadsWorkers(threadsNumber);
+}
+
+size_t CAESEncoderController::GetMaximumThreadsWorkers() const noexcept
+{
+    EDITOR_ASSERT(m_Encoder);
+    return m_Encoder ? m_Encoder->GetMaximumThreadsWorkers() : 1u;
 }
 
 IAESEncoderControllerUniquePtr IAESEncoderController::Create()

@@ -19,7 +19,7 @@
      <item row="0" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Key type:</string>
+        <string>Key length:</string>
        </property>
       </widget>
      </item>
@@ -41,6 +41,23 @@
       <widget class="QLineEdit" name="m_KeyLineEdit">
        <property name="echoMode">
         <enum>QLineEdit::PasswordEchoOnEdit</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Max threads:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QComboBox" name="m_MaxThreadsNumberComboBox">
+       <property name="editable">
+        <bool>true</bool>
+       </property>
+       <property name="insertPolicy">
+        <enum>QComboBox::InsertAlphabetically</enum>
        </property>
       </widget>
      </item>
@@ -82,9 +99,26 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_MaxThreadsNumberComboBox</sender>
+   <signal>currentIndexChanged(QString)</signal>
+   <receiver>AESEncoderView</receiver>
+   <slot>OnMaxThreadsNumberChanged(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>234</x>
+     <y>71</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>OnKeyTypeChanged(int)</slot>
   <slot>OnKeyChanged(QString)</slot>
+  <slot>OnMaxThreadsNumberChanged(QString)</slot>
  </slots>
 </ui>

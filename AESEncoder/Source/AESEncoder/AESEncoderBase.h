@@ -14,11 +14,14 @@ namespace AES
 
         virtual EncoderData Encode(const EncoderData& data) override final;
 
-        virtual bool SetKeyType(EKeyType keyType) noexcept override final;
+        virtual void SetKeyType(EKeyType keyType) noexcept override final;
         virtual EKeyType GetKeyType() const noexcept override final;
 
-        virtual bool SetKey(const Key& key) noexcept override final;
+        virtual void SetKey(const Key& key) noexcept override final;
         virtual const Key& GetKey() const noexcept override final;
+
+        virtual bool SetMaximumThreadsWorkers(size_t threadsNumber) noexcept override final;
+        virtual size_t GetMaximumThreadsWorkers() const noexcept override final;
 
     protected:
         using ExpandedKey = std::vector<uint8_t>;
@@ -47,6 +50,8 @@ namespace AES
 
         unsigned int m_ExpandKeyRoundsNumber = 8u;
         unsigned int m_RoundsNumber = 14u;
+
+        size_t m_MaximumThreadsWorkers = 1u;
     };
 }
 

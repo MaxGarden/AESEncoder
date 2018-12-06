@@ -253,7 +253,7 @@ void CMainWindow::OnEncoderUnregistered(const QString& name, IEncoder& encoder)
         SelectEncoder(nullptr);
 }
 
-void CMainWindow::EncodeFile(const QString& savePath)
+void CMainWindow::EncodeFile(const QString& savePath) const
 {
     const auto fileToEncodeName = m_FileToEncodeLineEdit ? m_FileToEncodeLineEdit->text() : QString{};
 
@@ -283,10 +283,11 @@ void CMainWindow::EncodeFile(const QString& savePath)
     if (m_LogTextEdit)
     {
         const auto currentTime = QDateTime::currentDateTime().time().toString();
-        m_LogTextEdit->append(QString{ "%1: Encoding file %2 to file %3 by using encoder %4 took %5 ns." }
+        m_LogTextEdit->append(QString{ "%1: Encoding file %2 to file %3 by using encoder %4 (max threads number - %5) took %6 ns." }
             .arg(currentTime)
             .arg(fileToEncodeName, fileToSaveName)
             .arg(m_EncoderSelectComboBox ? m_EncoderSelectComboBox->currentText() : tr("UNKNOWN"))
+            .arg(m_CurrentEncoder->GetMaximumThreadsWorkers())
             .arg(encodingTimeInNanoSeconds));
     }
 }

@@ -23,10 +23,10 @@ namespace AES
     public:
         virtual ~IAESEncoder() = default;
 
-        virtual bool SetKeyType(EKeyType keyType) noexcept = 0;
+        virtual void SetKeyType(EKeyType keyType) noexcept = 0;
         virtual EKeyType GetKeyType() const noexcept = 0;
 
-        virtual bool SetKey(const Key& key) noexcept = 0;
+        virtual void SetKey(const Key& key) noexcept = 0;
         virtual const Key& GetKey() const noexcept = 0;
     };
 }

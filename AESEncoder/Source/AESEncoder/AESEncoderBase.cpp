@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "AESEncoderBase.h"
+#include <future>
 
 using namespace AES;
 
@@ -34,19 +35,45 @@ EncoderData CAESEncoderBase::Encode(const EncoderData& data)
 
     const auto expandedKey = ExpandKey();
 
-    const auto encodeResult = EncodeDataChunk(result.data(), result.size(), expandedKey);
-    EDITOR_ASSERT(encodeResult);
+    const auto possibleThreadsWorkersCount = result.size() / s_StateSize;
+    const auto threadsWorkersCount = std::max(1u, std::min(possibleThreadsWorkersCount, GetMaximumThreadsWorkers()));
 
-    if (!encodeResult)
+    const auto launchWorker = [this, &result, &expandedKey](size_t chunkOffset, size_t chunkSize)
+    {
+        return std::async(std::launch::async, [this, &result, &expandedKey, chunkOffset, chunkSize]()
+        {
+            return EncodeDataChunk(&result[chunkOffset], chunkSize, expandedKey);
+        });
+    };
+
+    std::vector<std::future<bool>> asyncWorkers;
+    asyncWorkers.reserve(threadsWorkersCount);
+
+    auto dataOffset = 0u;
+    const auto dataSize = result.size();
+    const auto dataChunkSize = (dataSize / s_StateSize) / threadsWorkersCount * s_StateSize;
+
+    for (auto i = 1u; i < threadsWorkersCount; ++i)
+    {
+        asyncWorkers.emplace_back(launchWorker(dataOffset, dataChunkSize));
+        dataOffset += dataChunkSize;
+    }
+
+    asyncWorkers.emplace_back(launchWorker(dataOffset, dataSize - dataOffset));
+
+    auto workersResult = true;
+    for (auto& worker : asyncWorkers)
+        workersResult &= worker.get();
+
+    if (!workersResult)
         result.clear();
 
     return result;
 }
 
-bool CAESEncoderBase::SetKeyType(EKeyType keyType) noexcept
+void CAESEncoderBase::SetKeyType(EKeyType keyType) noexcept
 {
     m_KeyType = keyType;
-    return true;
 }
 
 EKeyType CAESEncoderBase::GetKeyType() const noexcept
@@ -54,15 +81,28 @@ EKeyType CAESEncoderBase::GetKeyType() const noexcept
     return m_KeyType;
 }
 
-bool CAESEncoderBase::SetKey(const Key& key) noexcept
+void CAESEncoderBase::SetKey(const Key& key) noexcept
 {
     m_Key = key;
-    return true;
 }
 
 const AES::Key& CAESEncoderBase::GetKey() const noexcept
 {
     return m_Key;
+}
+
+bool CAESEncoderBase::SetMaximumThreadsWorkers(size_t threadsNumber) noexcept
+{
+    if (threadsNumber == 0)
+        return false;
+
+    m_MaximumThreadsWorkers = threadsNumber;
+    return true;
+}
+
+size_t CAESEncoderBase::GetMaximumThreadsWorkers() const noexcept
+{
+    return m_MaximumThreadsWorkers;
 }
 
 bool CAESEncoderBase::Setup() noexcept

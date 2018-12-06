@@ -18,6 +18,9 @@ namespace AES
         virtual bool SetKey(const Key& key) noexcept = 0;
         virtual const Key& GetKey() const noexcept = 0;
 
+        virtual bool SetMaximumThreadsWorkers(size_t threadsNumber) noexcept = 0;
+        virtual size_t GetMaximumThreadsWorkers() const noexcept = 0;
+
         static IAESEncoderControllerUniquePtr Create();
     };
 }
