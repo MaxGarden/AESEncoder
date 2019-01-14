@@ -3,7 +3,6 @@
 #pragma once
 
 #include "Encoder/Encoder.h"
-#include "AESBasicOperations.h"
 
 namespace AES
 {

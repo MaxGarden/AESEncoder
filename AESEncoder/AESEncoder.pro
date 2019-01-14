@@ -28,8 +28,7 @@ for(FILE,EXTRA_BINFILES_WIN){
 
 SOURCES += \
     Source/main.cpp                                                                 \     
-    Source/MainWindow/MainWindow.cpp                                                \     
-    Source/MainWindow/OperationProgressDialog.cpp                                   \
+    Source/MainWindow/MainWindow.cpp                                                \
     Source/AESEncoder/AESEncoder.cpp                                                \
     Source/AESEncoder/AESEncoderBase.cpp                                            \
     Source/AESEncoder/AESCppEncoder.cpp                                             \
@@ -39,8 +38,7 @@ SOURCES += \
     Source/AESEncoder/Widgets/AESEncoderViewWidget.cpp                              \
 
 HEADERS += \
-    Source/Pointers.h                                                               \     
-    Source/MainWindow/OperationProgressDialog.h                                     \
+    Source/Pointers.h                                                               \
     Source/MainWindow/MainWindow.h                                                  \
     Source/Encoder/Encoder.h                                                        \
     Source/Encoder/EncoderController.h                                              \
@@ -49,7 +47,6 @@ HEADERS += \
     Source/AESEncoder/AESEncoderBase.h                                              \
     Source/AESEncoder/AESCppEncoder.h                                               \
     Source/AESEncoder/AESAsmEncoder.h                                               \
-    Source/AESEncoder/AESBasicOperations.h                                          \
     Source/AESEncoder/AESEncoderController.h                                        \
     Source/AESEncoder/AESEncoderView.h                                              \
     Source/AESEncoder/Widgets/AESEncoderViewWidget.h                                \

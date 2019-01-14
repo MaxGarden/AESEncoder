@@ -5,7 +5,6 @@ DECLARE_POINTERS(IEncoderView)
 namespace AES
 {
     DECLARE_POINTERS(IAESEncoder);
-    DECLARE_POINTERS(IAESBasicOperations);
     DECLARE_POINTERS(IAESEncoderController);
     DECLARE_POINTERS(IAESEncoderView);
 }
